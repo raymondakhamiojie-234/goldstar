@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, X } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import api from '../../api/client';
 
 export function VehiclesAdmin() {

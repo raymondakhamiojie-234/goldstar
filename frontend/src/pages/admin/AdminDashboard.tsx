@@ -8,9 +8,6 @@ import {
   MessageSquare, 
   Settings, 
   LogOut,
-  Plus,
-  Edit,
-  Trash2,
   TrendingUp,
   Users,
   Eye
