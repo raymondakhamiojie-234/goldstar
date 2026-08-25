@@ -72,7 +72,11 @@ export function VehiclesAdmin() {
               <tr key={v.id} className="hover:bg-white/5 transition-colors">
                 <td className="px-6 py-4 flex items-center gap-3">
                   {v.images?.[0] ? (
-                    <img src={`http://localhost:5000${v.images[0].url}`} className="w-12 h-8 rounded object-cover" />
+                    <img 
+                      src={`${import.meta.env.VITE_SERVER_URL || 'http://localhost:5000'}${v.images[0].url}`}
+                      alt={v.name} 
+                      className="w-12 h-12 object-cover rounded bg-zinc-800" 
+                    />
                   ) : (
                     <div className="w-12 h-8 bg-zinc-800 rounded"></div>
                   )}

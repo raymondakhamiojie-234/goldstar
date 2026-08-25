@@ -77,7 +77,7 @@ export function VehicleDetails() {
             {/* Main Image Gallery */}
             <div className="mb-6 rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 aspect-video relative group flex items-center justify-center">
               {vehicle.images && vehicle.images.length > 0 ? (
-                <img src={`http://localhost:5000${vehicle.images[activeImage].url}`} alt={vehicle.name} className="w-full h-full object-cover" />
+                <img src={`${import.meta.env.VITE_SERVER_URL || 'http://localhost:5000'}${vehicle.images[activeImage].url}`} alt={vehicle.name} className="w-full h-full object-cover" />
               ) : (
                 <div className="text-gray-600">No Image Available</div>
               )}
@@ -97,7 +97,7 @@ export function VehicleDetails() {
                     onClick={() => setActiveImage(idx)}
                     className={`relative rounded-xl overflow-hidden aspect-video border-2 transition-all ${activeImage === idx ? 'border-gold scale-105' : 'border-transparent opacity-50 hover:opacity-100'}`}
                   >
-                    <img src={`http://localhost:5000${img.url}`} alt="" className="w-full h-full object-cover" />
+                    <img src={`${import.meta.env.VITE_SERVER_URL || 'http://localhost:5000'}${img.url}`} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

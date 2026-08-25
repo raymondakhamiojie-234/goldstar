@@ -154,7 +154,7 @@ export function Marketplace() {
                   <div key={vehicle.id} className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden group hover:border-gold/30 transition-all flex flex-col">
                     <div className="relative h-64 overflow-hidden bg-zinc-800">
                       {vehicle.images?.[0] && (
-                        <img src={`http://localhost:5000${vehicle.images[0].url}`} alt={vehicle.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <img src={`${import.meta.env.VITE_SERVER_URL || 'http://localhost:5000'}${vehicle.images[0].url}`} alt={vehicle.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       )}
                       <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md px-3 py-1 rounded border border-white/10 text-xs font-bold text-white uppercase tracking-wider">
                         {vehicle.category?.name || 'Vehicle'}
