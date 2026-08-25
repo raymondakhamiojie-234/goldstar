@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  vehicles    Vehicle[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Vehicle {
+  id           String         @id @default(uuid())
+  name         String
+  brand        String?
+  year         Int?
+  condition    String?        // e.g., "New", "Used - Excellent", "Used - Good"
+  mileage      Int?
+  transmission String?        // e.g., "Automatic", "Manual"
+  fuelType     String?        // e.g., "Diesel", "Petrol", "Electric"
+  price        Float?
+  location     String?
+  description  String?
+  features     String[]       // Array of feature strings
+  isSold       Boolean        @default(false)
+  isFeatured   Boolean        @default(false)
+  categoryId   String?
+  category     Category?      @relation(fields: [categoryId], references: [id])
+  images       VehicleImage[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model VehicleImage {
+  id        String   @id @default(uuid())
+  url       String
+  isPrimary Boolean  @default(false)
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  icon        String?  // Name of the lucide-react icon or similar
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Part {
+  id           String   @id @default(uuid())
+  name         String
+  category     String   // e.g., "ECU", "Sensors"
+  description  String?
+  price        Float?
+  isAvailable  Boolean  @default(true)
+  imageUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Testimonial {
+  id         String   @id @default(uuid())
+  name       String
+  role       String?
+  content    String
+  rating     Int      @default(5)
+  isApproved Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Enquiry {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  email       String?
+  serviceReq  String?  // Which service/vehicle they are asking about
+  message     String?
+  status      String   @default("New") // "New", "Contacted", "Processing", "Completed"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSetting {
+  id           String   @id @default(uuid())
+  key          String   @unique
+  value        String
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #FFC900;
+  --color-gold-dark: #E5B500;
+  --color-gold-light: #FFD633;
+  --color-black: #050505;
+}
+
+body {
+  background-color: var(--color-black);
+  color: white;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .text-gradient {
+    background-image: linear-gradient(to right, var(--color-gold), var(--color-gold-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .bg-gradient-gold {
+    background-image: linear-gradient(to right, var(--color-gold-dark), var(--color-gold), var(--color-gold-light));
+  }
+}
