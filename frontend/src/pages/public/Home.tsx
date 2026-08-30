@@ -315,7 +315,7 @@ export function Home() {
               {/* Map Placeholder */}
               <div className="h-64 bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
                 <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1m3!1m2!1s0x103b8c58bd0d4cb3%3A0x6d36e81f1489e34c!2sApapa%20-%20Oshodi%20Expy%2C%20Lagos!5e0!3m2!1sen!2sng!4v1715000000000!5m2!1sen!2sng" 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.7077673994356!2d3.336338415277884!3d6.431622395346083!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b2ae68280c1%3A0xdc9e87a367c3d9cb!2sLagos!5e0!3m2!1sen!2sng!4v1684346098048!5m2!1sen!2sng"
                   width="100%" 
                   height="100%" 
                   style={{border:0}} 
