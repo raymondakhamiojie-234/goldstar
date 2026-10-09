@@ -40,8 +40,9 @@ export function VehiclesAdmin() {
       });
       setIsModalOpen(false);
       fetchVehicles();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create vehicle', err);
+      alert('Error creating vehicle: ' + (err.response?.data?.details || err.response?.data?.error || err.message));
     }
   };
 

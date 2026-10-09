@@ -96,11 +96,19 @@ app.get('/api/vehicles/:id', async (req, res) => {
   }
 });
 
-app.post('/api/vehicles', requireAdmin, upload.array('images', 5), async (req, res) => {
+app.post('/api/vehicles', requireAdmin, (req, res, next) => {
+  upload.array('images', 5)(req, res, function (err) {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(500).json({ error: 'Multer upload error', details: String(err) });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     const { name, brand, year, price, condition, description } = req.body;
     let { categoryId } = req.body;
-    if (categoryId === '') categoryId = undefined;
+    if (categoryId === 'undefined' || categoryId === 'null' || categoryId === '') categoryId = undefined;
     
     // Parse files if they exist
     const files = req.files as Express.Multer.File[];
@@ -110,7 +118,7 @@ app.post('/api/vehicles', requireAdmin, upload.array('images', 5), async (req, r
       data: {
         name,
         brand,
-        year: year ? parseInt(year) : null,
+        year: (year && !isNaN(parseInt(year))) ? parseInt(year) : null,
         price: price,
         condition,
         description,
@@ -123,8 +131,8 @@ app.post('/api/vehicles', requireAdmin, upload.array('images', 5), async (req, r
     });
     res.json(vehicle);
   } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to create vehicle' });
+    console.error('Prisma Create Error:', err);
+    res.status(500).json({ error: 'Failed to create vehicle', details: err.message || String(err) });
   }
 });
 
