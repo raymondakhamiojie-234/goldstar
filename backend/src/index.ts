@@ -24,9 +24,15 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Configure Multer
+import fs from 'fs';
+const uploadDir = path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../public/uploads'));
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -92,7 +98,7 @@ app.get('/api/vehicles/:id', async (req, res) => {
 
 app.post('/api/vehicles', requireAdmin, upload.array('images', 5), async (req, res) => {
   try {
-    const { name, brand, model, year, price, condition, description } = req.body;
+    const { name, brand, year, price, condition, description } = req.body;
     let { categoryId } = req.body;
     if (categoryId === '') categoryId = undefined;
     
@@ -104,8 +110,7 @@ app.post('/api/vehicles', requireAdmin, upload.array('images', 5), async (req, r
       data: {
         name,
         brand,
-        model,
-        year: parseInt(year),
+        year: year ? parseInt(year) : null,
         price: price,
         condition,
         description,

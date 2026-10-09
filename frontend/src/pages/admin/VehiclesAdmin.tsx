@@ -6,7 +6,7 @@ export function VehiclesAdmin() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', brand: '', model: '', year: '', price: '', condition: 'USED', description: '', categoryId: ''
+    name: '', brand: '', year: '', price: '', condition: 'USED', description: '', categoryId: ''
   });
   const [images, setImages] = useState<FileList | null>(null);
 
