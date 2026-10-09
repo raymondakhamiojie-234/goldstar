@@ -136,6 +136,58 @@ app.post('/api/vehicles', requireAdmin, (req, res, next) => {
   }
 });
 
+app.put('/api/vehicles/:id', requireAdmin, (req, res, next) => {
+  upload.any()(req, res, function (err) {
+    if (err) return res.status(500).json({ error: 'Multer upload error', details: String(err) });
+    next();
+  });
+}, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, brand, year, price, condition, description } = req.body;
+    let { categoryId } = req.body;
+    if (categoryId === 'undefined' || categoryId === 'null' || categoryId === '') categoryId = undefined;
+    
+    // Parse files if they exist
+    const files = req.files as Express.Multer.File[];
+    const imageUrls = files?.map(f => `/uploads/${f.filename}`) || [];
+
+    const updateData: any = {
+      name,
+      brand,
+      year: (year && !isNaN(parseInt(year))) ? parseInt(year) : null,
+      price: price,
+      condition,
+      description,
+      categoryId,
+    };
+
+    if (imageUrls.length > 0) {
+      updateData.images = { create: imageUrls.map(url => ({ url })) };
+    }
+
+    const vehicle = await prisma.vehicle.update({
+      where: { id },
+      data: updateData,
+      include: { images: true }
+    });
+    res.json(vehicle);
+  } catch (err: any) {
+    console.error('Prisma Update Error:', err);
+    res.status(500).json({ error: 'Failed to update vehicle', details: err.message || String(err) });
+  }
+});
+
+app.delete('/api/vehicles/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.vehicle.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete vehicle' });
+  }
+});
+
 // Add other basic GET endpoints
 app.get('/api/categories', async (req, res) => {
   const categories = await prisma.category.findMany();

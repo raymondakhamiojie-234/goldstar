@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2, X, Edit2 } from 'lucide-react';
 import api from '../../api/client';
 
 export function VehiclesAdmin() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '', brand: '', year: '', price: '', condition: 'USED', description: '', categoryId: ''
-  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  
+  const defaultForm = { name: '', brand: '', year: '', price: '', condition: 'USED', description: '', categoryId: '' };
+  const [formData, setFormData] = useState(defaultForm);
   const [images, setImages] = useState<FileList | null>(null);
 
   const fetchVehicles = async () => {
@@ -23,6 +24,31 @@ export function VehiclesAdmin() {
     fetchVehicles();
   }, []);
 
+  const openEditModal = (v: any) => {
+    setEditingId(v.id);
+    setFormData({
+      name: v.name || '',
+      brand: v.brand || '',
+      year: v.year?.toString() || '',
+      price: v.price?.toString() || '',
+      condition: v.condition || 'USED',
+      description: v.description || '',
+      categoryId: v.categoryId || ''
+    });
+    setImages(null);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this vehicle?')) return;
+    try {
+      await api.delete(`/vehicles/${id}`);
+      fetchVehicles();
+    } catch (err) {
+      alert('Failed to delete vehicle');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = new FormData();
@@ -35,14 +61,19 @@ export function VehiclesAdmin() {
     }
 
     try {
-      await api.post('/vehicles', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      if (editingId) {
+        await api.put(`/vehicles/${editingId}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      } else {
+        await api.post('/vehicles', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
       setIsModalOpen(false);
+      setEditingId(null);
+      setFormData(defaultForm);
+      setImages(null);
       fetchVehicles();
     } catch (err: any) {
-      console.error('Failed to create vehicle', err);
-      alert('Error creating vehicle: ' + (err.response?.data?.details || err.response?.data?.error || err.message));
+      console.error('Failed to save vehicle', err);
+      alert('Error saving vehicle: ' + (err.response?.data?.details || err.response?.data?.error || err.message));
     }
   };
 
@@ -88,7 +119,8 @@ export function VehiclesAdmin() {
                   <span className="bg-green-500/10 text-green-500 px-2 py-1 rounded text-xs font-bold">{v.condition}</span>
                 </td>
                 <td className="px-6 py-4 flex gap-3">
-                  <button className="text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => openEditModal(v)} className="text-gray-400 hover:text-blue-500"><Edit2 className="w-4 h-4" /></button>
+                  <button onClick={() => handleDelete(v.id)} className="text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                 </td>
               </tr>
             ))}
@@ -105,8 +137,8 @@ export function VehiclesAdmin() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">Add New Vehicle</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
+              <h3 className="text-xl font-bold text-white">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</h3>
+              <button onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData(defaultForm); }} className="text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -146,7 +178,7 @@ export function VehiclesAdmin() {
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-lg text-white font-medium hover:bg-white/5">Cancel</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData(defaultForm); }} className="px-4 py-2 rounded-lg text-white font-medium hover:bg-white/5">Cancel</button>
                 <button type="submit" className="bg-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-gold-light">Save Vehicle</button>
               </div>
             </form>
