@@ -118,10 +118,7 @@ export function VehiclesAdmin() {
                   <label className="block text-xs uppercase text-gray-500 mb-1">Brand</label>
                   <input required value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
                 </div>
-                <div>
-                  <label className="block text-xs uppercase text-gray-500 mb-1">Model</label>
-                  <input required value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
-                </div>
+
                 <div>
                   <label className="block text-xs uppercase text-gray-500 mb-1">Year</label>
                   <input type="number" required value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
