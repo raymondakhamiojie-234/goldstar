@@ -97,7 +97,7 @@ app.get('/api/vehicles/:id', async (req, res) => {
 });
 
 app.post('/api/vehicles', requireAdmin, (req, res, next) => {
-  upload.array('images', 5)(req, res, function (err) {
+  upload.any()(req, res, function (err) {
     if (err) {
       console.error('Multer error:', err);
       return res.status(500).json({ error: 'Multer upload error', details: String(err) });
