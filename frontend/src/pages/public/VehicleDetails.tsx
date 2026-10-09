@@ -132,7 +132,7 @@ export function VehicleDetails() {
               
               <div className="mb-8">
                 <span className="text-gray-400 uppercase text-xs font-bold tracking-wider mb-2 block">Asking Price</span>
-                <div className="text-4xl font-bold text-gold">₦ {vehicle.price.toLocaleString()}</div>
+                <div className="text-4xl font-bold text-gold">{vehicle.price}</div>
               </div>
 
               {/* Quick Specs */}

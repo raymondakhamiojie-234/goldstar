@@ -82,7 +82,7 @@ export function VehiclesAdmin() {
                   )}
                   <span className="font-medium text-white">{v.name}</span>
                 </td>
-                <td className="px-6 py-4">₦ {v.price.toLocaleString()}</td>
+                <td className="px-6 py-4">{v.price}</td>
                 <td className="px-6 py-4">
                   <span className="bg-green-500/10 text-green-500 px-2 py-1 rounded text-xs font-bold">{v.condition}</span>
                 </td>
@@ -127,8 +127,8 @@ export function VehiclesAdmin() {
                   <input type="number" required value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase text-gray-500 mb-1">Price (₦)</label>
-                  <input type="number" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
+                  <label className="block text-xs uppercase text-gray-500 mb-1">Price</label>
+                  <input type="text" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase text-gray-500 mb-1">Condition</label>

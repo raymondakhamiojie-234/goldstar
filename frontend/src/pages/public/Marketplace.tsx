@@ -30,8 +30,13 @@ export function Marketplace() {
       (v.category?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
-      if (sortOption === 'Price: Low to High') return (a.price || 0) - (b.price || 0);
-      if (sortOption === 'Price: High to Low') return (b.price || 0) - (a.price || 0);
+      const getNumericPrice = (p: any) => {
+        if (!p) return 0;
+        const num = parseFloat(String(p).replace(/[^0-9.-]+/g, ""));
+        return isNaN(num) ? 0 : num;
+      };
+      if (sortOption === 'Price: Low to High') return getNumericPrice(a.price) - getNumericPrice(b.price);
+      if (sortOption === 'Price: High to Low') return getNumericPrice(b.price) - getNumericPrice(a.price);
       if (sortOption === 'Year: Newest to Oldest') return (b.year || 0) - (a.year || 0);
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
@@ -168,7 +173,7 @@ export function Marketplace() {
                     <div className="p-6 flex flex-col flex-grow">
                       <h3 className="text-xl font-bold text-white mb-2 line-clamp-1 group-hover:text-gold transition-colors">{vehicle.name}</h3>
                       <div className="text-2xl font-bold text-white mb-4">
-                        ₦ {vehicle.price?.toLocaleString()}
+                        {vehicle.price}
                       </div>
                       
                       <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm text-gray-400 mb-6 flex-grow">

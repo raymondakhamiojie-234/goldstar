@@ -106,7 +106,7 @@ app.post('/api/vehicles', requireAdmin, upload.array('images', 5), async (req, r
         brand,
         model,
         year: parseInt(year),
-        price: parseFloat(price),
+        price: price,
         condition,
         description,
         categoryId,

@@ -37,7 +37,7 @@ model Vehicle {
   mileage      Int?
   transmission String?        // e.g., "Automatic", "Manual"
   fuelType     String?        // e.g., "Diesel", "Petrol", "Electric"
-  price        Float?
+  price        String?
   location     String?
   description  String?
   features     String[]       // Array of feature strings
