@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, X, Edit2 } from 'lucide-react';
-import api from '../../api/client';
+import api, { getServerUrl } from '../../api/client';
 
 export function VehiclesAdmin() {
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -108,7 +108,7 @@ export function VehiclesAdmin() {
                 <td className="px-6 py-4 flex items-center gap-3">
                   {v.images?.[0] ? (
                     <img 
-                      src={`${import.meta.env.VITE_SERVER_URL || 'http://localhost:5000'}${v.images[0].url}`}
+                      src={`${getServerUrl()}${v.images[0].url}`}
                       alt={v.name} 
                       className="w-12 h-12 object-cover rounded bg-zinc-800" 
                     />
