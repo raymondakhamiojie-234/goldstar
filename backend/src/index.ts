@@ -106,7 +106,7 @@ app.post('/api/vehicles', requireAdmin, (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { name, brand, year, price, condition, description } = req.body;
+    const { name, brand, year, price, condition, description, mileage, transmission, fuelType } = req.body;
     let { categoryId } = req.body;
     if (categoryId === 'undefined' || categoryId === 'null' || categoryId === '') categoryId = undefined;
     
@@ -119,6 +119,9 @@ app.post('/api/vehicles', requireAdmin, (req, res, next) => {
         name,
         brand,
         year: (year && !isNaN(parseInt(year))) ? parseInt(year) : null,
+        mileage: (mileage && !isNaN(parseInt(mileage))) ? parseInt(mileage) : null,
+        transmission,
+        fuelType,
         price: price,
         condition,
         description,
@@ -144,7 +147,7 @@ app.put('/api/vehicles/:id', requireAdmin, (req, res, next) => {
 }, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, brand, year, price, condition, description } = req.body;
+    const { name, brand, year, price, condition, description, mileage, transmission, fuelType } = req.body;
     let { categoryId } = req.body;
     if (categoryId === 'undefined' || categoryId === 'null' || categoryId === '') categoryId = undefined;
     
@@ -156,6 +159,9 @@ app.put('/api/vehicles/:id', requireAdmin, (req, res, next) => {
       name,
       brand,
       year: (year && !isNaN(parseInt(year))) ? parseInt(year) : null,
+      mileage: (mileage && !isNaN(parseInt(mileage))) ? parseInt(mileage) : null,
+      transmission,
+      fuelType,
       price: price,
       condition,
       description,

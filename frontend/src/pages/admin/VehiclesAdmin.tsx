@@ -7,7 +7,7 @@ export function VehiclesAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
-  const defaultForm = { name: '', brand: '', year: '', price: '', condition: 'USED', description: '', categoryId: '' };
+  const defaultForm = { name: '', brand: '', year: '', price: '', condition: 'USED', description: '', categoryId: '', mileage: '', transmission: '', fuelType: '' };
   const [formData, setFormData] = useState(defaultForm);
   const [images, setImages] = useState<FileList | null>(null);
 
@@ -33,7 +33,10 @@ export function VehiclesAdmin() {
       price: v.price?.toString() || '',
       condition: v.condition || 'USED',
       description: v.description || '',
-      categoryId: v.categoryId || ''
+      categoryId: v.categoryId || '',
+      mileage: v.mileage?.toString() || '',
+      transmission: v.transmission || '',
+      fuelType: v.fuelType || ''
     });
     setImages(null);
     setIsModalOpen(true);
@@ -166,6 +169,28 @@ export function VehiclesAdmin() {
                     <option value="NEW">New</option>
                     <option value="USED">Used</option>
                     <option value="FOREIGN_USED">Foreign Used</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase text-gray-500 mb-1">Mileage</label>
+                  <input type="number" placeholder="e.g. 50000" value={formData.mileage} onChange={e => setFormData({...formData, mileage: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase text-gray-500 mb-1">Transmission</label>
+                  <select value={formData.transmission} onChange={e => setFormData({...formData, transmission: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white">
+                    <option value="">Select Transmission</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="Manual">Manual</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase text-gray-500 mb-1">Fuel Type</label>
+                  <select value={formData.fuelType} onChange={e => setFormData({...formData, fuelType: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white">
+                    <option value="">Select Fuel Type</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Hybrid">Hybrid</option>
                   </select>
                 </div>
                 <div className="col-span-2">
