@@ -1,14 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 import bcrypt from 'bcrypt';
 
 neonConfig.webSocketConstructor = ws;
 
-const DATABASE_URL = "postgresql://neondb_owner:npg_Xwhd7MGORxF5@ep-frosty-rice-b4fethyr-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require";
-const pool = new Pool({ connectionString: DATABASE_URL });
-const adapter = new PrismaNeon(pool);
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_Xwhd7MGORxF5@ep-frosty-rice-b4fethyr-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require";
+const adapter = new PrismaNeon({ connectionString: DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

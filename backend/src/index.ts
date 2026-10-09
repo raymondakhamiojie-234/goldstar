@@ -5,7 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -15,8 +15,7 @@ dotenv.config();
 neonConfig.webSocketConstructor = ws;
 
 const app = express();
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaNeon(pool);
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
