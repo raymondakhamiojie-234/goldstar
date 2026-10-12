@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, X, Edit2, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, X, Edit2 } from 'lucide-react';
 import api, { getImageUrl } from '../../api/client';
 
 const compressImage = (file: File): Promise<string> => {
