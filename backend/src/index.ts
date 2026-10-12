@@ -20,25 +20,19 @@ const prisma = new PrismaClient({ adapter });
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
-// Configure Multer
+// Configure Multer in-memory storage (prevents loss on ephemeral cloud filesystems)
 import fs from 'fs';
 const uploadDir = path.join(__dirname, '../public/uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-const upload = multer({ storage });
+const storage = multer.memoryStorage();
+const upload = multer({ storage, limits: { fileSize: 15 * 1024 * 1024 } });
 
 // --- AUTHENTICATION ---
 app.post('/api/auth/login', async (req, res) => {
@@ -107,12 +101,36 @@ app.post('/api/vehicles', requireAdmin, (req, res, next) => {
 }, async (req, res) => {
   try {
     const { name, brand, year, price, condition, description, mileage, transmission, fuelType } = req.body;
-    let { categoryId } = req.body;
+    let { categoryId, images } = req.body;
     if (categoryId === 'undefined' || categoryId === 'null' || categoryId === '') categoryId = undefined;
     
-    // Parse files if they exist
+    const imageUrls: string[] = [];
+
+    // Parse files if uploaded via multipart
     const files = req.files as Express.Multer.File[];
-    const imageUrls = files?.map(f => `/uploads/${f.filename}`) || [];
+    if (files && Array.isArray(files)) {
+      for (const f of files) {
+        if (f.buffer) {
+          imageUrls.push(`data:${f.mimetype || 'image/jpeg'};base64,${f.buffer.toString('base64')}`);
+        }
+      }
+    }
+
+    // Parse base64 strings or URLs passed in body
+    if (images) {
+      try {
+        const parsed = typeof images === 'string' ? (images.startsWith('[') ? JSON.parse(images) : [images]) : images;
+        if (Array.isArray(parsed)) {
+          for (const item of parsed) {
+            if (typeof item === 'string' && item.trim()) {
+              imageUrls.push(item.trim());
+            }
+          }
+        }
+      } catch (e) {
+        if (typeof images === 'string' && images.trim()) imageUrls.push(images.trim());
+      }
+    }
 
     const vehicle = await prisma.vehicle.create({
       data: {
@@ -148,12 +166,36 @@ app.put('/api/vehicles/:id', requireAdmin, (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, brand, year, price, condition, description, mileage, transmission, fuelType } = req.body;
-    let { categoryId } = req.body;
+    let { categoryId, images } = req.body;
     if (categoryId === 'undefined' || categoryId === 'null' || categoryId === '') categoryId = undefined;
     
-    // Parse files if they exist
+    const imageUrls: string[] = [];
+
+    // Parse files if uploaded via multipart
     const files = req.files as Express.Multer.File[];
-    const imageUrls = files?.map(f => `/uploads/${f.filename}`) || [];
+    if (files && Array.isArray(files)) {
+      for (const f of files) {
+        if (f.buffer) {
+          imageUrls.push(`data:${f.mimetype || 'image/jpeg'};base64,${f.buffer.toString('base64')}`);
+        }
+      }
+    }
+
+    // Parse base64 strings or URLs passed in body
+    if (images) {
+      try {
+        const parsed = typeof images === 'string' ? (images.startsWith('[') ? JSON.parse(images) : [images]) : images;
+        if (Array.isArray(parsed)) {
+          for (const item of parsed) {
+            if (typeof item === 'string' && item.trim()) {
+              imageUrls.push(item.trim());
+            }
+          }
+        }
+      } catch (e) {
+        if (typeof images === 'string' && images.trim()) imageUrls.push(images.trim());
+      }
+    }
 
     const updateData: any = {
       name,
@@ -169,6 +211,8 @@ app.put('/api/vehicles/:id', requireAdmin, (req, res, next) => {
     };
 
     if (imageUrls.length > 0) {
+      // Replace existing vehicle images with the updated set
+      await prisma.vehicleImage.deleteMany({ where: { vehicleId: id } });
       updateData.images = { create: imageUrls.map(url => ({ url })) };
     }
 

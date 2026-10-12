@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Filter, Search, ChevronDown, MapPin } from 'lucide-react';
-import api, { getServerUrl } from '../../api/client';
+import api, { getImageUrl } from '../../api/client';
 
 export function Marketplace() {
   const [filterOpen, setFilterOpen] = useState(false);
@@ -157,9 +157,18 @@ export function Marketplace() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredVehicles.map(vehicle => (
                   <div key={vehicle.id} className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden group hover:border-gold/30 transition-all flex flex-col">
-                    <div className="relative h-64 overflow-hidden bg-zinc-800">
-                      {vehicle.images?.[0] && (
-                        <img src={`${getServerUrl()}${vehicle.images[0].url}`} alt={vehicle.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="relative h-64 overflow-hidden bg-zinc-800 flex items-center justify-center">
+                      {vehicle.images?.[0] ? (
+                        <img 
+                          src={getImageUrl(vehicle.images[0].url)} 
+                          alt={vehicle.name} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="text-gray-500 text-sm">No Image Available</div>
                       )}
                       <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md px-3 py-1 rounded border border-white/10 text-xs font-bold text-white uppercase tracking-wider">
                         {vehicle.category?.name || 'Vehicle'}

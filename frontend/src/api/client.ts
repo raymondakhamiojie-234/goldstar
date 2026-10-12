@@ -17,7 +17,17 @@ api.interceptors.request.use((config) => {
 
 export const getServerUrl = () => {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  return apiUrl.replace(/\/api$/, '');
+  return apiUrl.replace(/\/api\/?$/, '');
+};
+
+export const getImageUrl = (url?: string) => {
+  if (!url) return '';
+  if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const base = getServerUrl();
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${base}${cleanUrl}`;
 };
 
 export default api;

@@ -1,11 +1,49 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, X, Edit2 } from 'lucide-react';
-import api, { getServerUrl } from '../../api/client';
+import { Plus, Trash2, X, Edit2, Image as ImageIcon } from 'lucide-react';
+import api, { getImageUrl } from '../../api/client';
+
+const compressImage = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith('image/')) {
+      return resolve('');
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        const maxDim = 1200;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(e.target?.result as string);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(file);
+  });
+};
 
 export function VehiclesAdmin() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const defaultForm = { name: '', brand: '', year: '', price: '', condition: 'USED', description: '', categoryId: '', mileage: '', transmission: '', fuelType: '' };
   const [formData, setFormData] = useState(defaultForm);
@@ -26,6 +64,7 @@ export function VehiclesAdmin() {
 
   const openEditModal = (v: any) => {
     setEditingId(v.id);
+    setExistingImages(v.images || []);
     setFormData({
       name: v.name || '',
       brand: v.brand || '',
@@ -54,29 +93,41 @@ export function VehiclesAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
-    
-    if (images) {
-      for (let i = 0; i < images.length; i++) {
-        data.append('images', images[i]);
-      }
-    }
+    setIsSubmitting(true);
 
     try {
-      if (editingId) {
-        await api.put(`/vehicles/${editingId}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
-      } else {
-        await api.post('/vehicles', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const compressedList: string[] = [];
+      if (images && images.length > 0) {
+        for (let i = 0; i < images.length; i++) {
+          const comp = await compressImage(images[i]);
+          if (comp) compressedList.push(comp);
+        }
       }
+
+      const payload: any = {
+        ...formData
+      };
+      if (compressedList.length > 0) {
+        payload.images = compressedList;
+      }
+
+      if (editingId) {
+        await api.put(`/vehicles/${editingId}`, payload);
+      } else {
+        await api.post('/vehicles', payload);
+      }
+
       setIsModalOpen(false);
       setEditingId(null);
+      setExistingImages([]);
       setFormData(defaultForm);
       setImages(null);
       fetchVehicles();
     } catch (err: any) {
       console.error('Failed to save vehicle', err);
       alert('Error saving vehicle: ' + (err.response?.data?.details || err.response?.data?.error || err.message));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -108,12 +159,15 @@ export function VehiclesAdmin() {
                 <td className="px-6 py-4 flex items-center gap-3">
                   {v.images?.[0] ? (
                     <img 
-                      src={`${getServerUrl()}${v.images[0].url}`}
+                      src={getImageUrl(v.images[0].url)}
                       alt={v.name} 
                       className="w-12 h-12 object-cover rounded bg-zinc-800" 
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
                     />
                   ) : (
-                    <div className="w-12 h-8 bg-zinc-800 rounded"></div>
+                    <div className="w-12 h-12 bg-zinc-800 rounded flex items-center justify-center text-xs text-gray-600">No img</div>
                   )}
                   <span className="font-medium text-white">{v.name}</span>
                 </td>
@@ -141,7 +195,7 @@ export function VehiclesAdmin() {
           <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-white">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</h3>
-              <button onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData(defaultForm); }} className="text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
+              <button onClick={() => { setIsModalOpen(false); setEditingId(null); setExistingImages([]); setFormData(defaultForm); }} className="text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -197,14 +251,30 @@ export function VehiclesAdmin() {
                   <label className="block text-xs uppercase text-gray-500 mb-1">Description</label>
                   <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white resize-none"></textarea>
                 </div>
+                {editingId && existingImages.length > 0 && (
+                  <div className="col-span-2">
+                    <label className="block text-xs uppercase text-gray-500 mb-1">Current Saved Images</label>
+                    <div className="flex gap-2 flex-wrap mb-2">
+                      {existingImages.map((img: any, idx: number) => (
+                        <div key={idx} className="relative w-16 h-16 rounded overflow-hidden border border-white/10 bg-zinc-800">
+                          <img src={getImageUrl(img.url)} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="col-span-2">
-                  <label className="block text-xs uppercase text-gray-500 mb-1">Images</label>
+                  <label className="block text-xs uppercase text-gray-500 mb-1">
+                    {editingId ? 'Upload New Images (Replaces current images)' : 'Images'}
+                  </label>
                   <input type="file" multiple accept="image/*" onChange={e => setImages(e.target.files)} className="w-full bg-black border border-white/10 rounded-lg p-2 text-white" />
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData(defaultForm); }} className="px-4 py-2 rounded-lg text-white font-medium hover:bg-white/5">Cancel</button>
-                <button type="submit" className="bg-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-gold-light">Save Vehicle</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setExistingImages([]); setFormData(defaultForm); }} className="px-4 py-2 rounded-lg text-white font-medium hover:bg-white/5">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="bg-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-gold-light disabled:opacity-50">
+                  {isSubmitting ? 'Optimizing & Saving...' : 'Save Vehicle'}
+                </button>
               </div>
             </form>
           </div>
